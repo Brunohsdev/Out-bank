@@ -11,7 +11,7 @@ namespace OUTBANK
 
         public void AnalisarRendimento(int meses)
         {
-            double valorAtual = Saldo;
+            double valorAtual = SaldoConta;
             double rendimento = 0;
 
             for (int i = 0; i< meses; i++)

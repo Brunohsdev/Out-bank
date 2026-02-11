@@ -19,7 +19,7 @@ namespace OUTBANK
             }
 
             double valorTaxa = Taxa * valor;
-            Saldo = Saldo - (valor + valorTaxa);
+            SaldoConta = SaldoConta - (valor + valorTaxa);
 
         }
     }

@@ -8,7 +8,7 @@ namespace OUTBANK
     internal class Conta
     {
         string Titular { get; }
-        public double SaldoConta { get; private set; } = 0;
+        public double SaldoConta { get; protected set; } = 0;
         private double SaldoTotal = 0;
         public double SaldoEmprestimo { get; private set;}
         public int NumeroConta { get; } = new Random().Next(1000, 9999);
