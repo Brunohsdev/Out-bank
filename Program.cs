@@ -2,6 +2,22 @@
 
 using OUTBANK;
 
+
+void ExibirTituloDaOpcao(string titulo)
+{
+    int quantidadeDeLetras = titulo.Length;
+    string asteriscos = string.Empty.PadLeft(quantidadeDeLetras, '*');
+    Console.WriteLine(asteriscos);
+    Console.WriteLine(titulo);
+    Console.WriteLine(asteriscos + "\n");
+}
+
+void LimparTela(int segundos)
+{
+    Thread.Sleep(segundos * 1000); 
+    Console.Clear();
+}
+
 void Menu()
 {
     Console.WriteLine(@"  
@@ -38,11 +54,12 @@ void Menu()
 
 void AcessarConta()
 {
-    Console.WriteLine("Acessar Conta");
-    Console.WriteLine("Digite seu CPF:");
-    string cpf = Console.ReadLine();
+    ExibirTituloDaOpcao("Acessar Conta");
+    Console.WriteLine("Digite seu Nome:");
+    LimparTela(0);
+    string nome = Console.ReadLine();
 
-    if (cpf.Length >=1)
+    if (nome.Length >=1)
     {
         Console.WriteLine("em andamento");
     }
@@ -64,18 +81,27 @@ void AcessarConta()
 
 void CriarConta()
 {
-    Console.WriteLine("Criar Conta"); 
+    ExibirTituloDaOpcao("Criar Conta");
     Console.WriteLine("Digite seu Nome:");
     string titular = Console.ReadLine();
-
+    LimparTela(0);
     Console.WriteLine($"Seja bem-vindo {titular}");
+    LimparTela(2);
+
     Console.WriteLine("Temos 3 opções de conta para a criação:");
+    LimparTela(2);
     Console.WriteLine("1 - Conta Corrente: Ideal para movimentações frequentes. Possui uma pequena taxa a cada saque realizado.");
+    LimparTela(4);
     Console.WriteLine("2 - Conta Poupança: Não possui taxa de saque e ainda pode gerar rendimento mensal sobre o saldo.");
+    LimparTela(4);
     Console.WriteLine("3 - Conta Empresarial: Indicada para empresas. Oferece limite de empréstimo extra para auxiliar no fluxo de caixa.");
-    Console.Write("Que tipo de conta você gostaria de criar no OUT BANK ?");
+    LimparTela(4);
+
+    
+    Console.Write("Que tipo de conta você gostaria de criar no OUT BANK ? ");
     int resposta = int.Parse(Console.ReadLine());
 
+    Conta conta;
     if (resposta < 1 || resposta > 3)
     {
         Console.WriteLine("Opção inválida! Voltando ao menu...");
@@ -84,22 +110,33 @@ void CriarConta()
     }
     else if (resposta == 1)
     {
-        ContaCorrente contaCorrente = new ContaCorrente(titular);
+        conta = new ContaCorrente(titular);
+        conta.exibirInformacoes();
     }
     else if (resposta == 2)
     {
-        ContaPoupanca contaPoupanca = new ContaPoupanca(titular);
+        conta = new ContaPoupanca(titular);
+        conta.exibirInformacoes();
     }
     else if(resposta == 3)
     {
-        ContaEmpresarial contaEmpresarial = new ContaEmpresarial(titular);
+        conta = new ContaEmpresarial(titular);
+        conta.exibirInformacoes();
     }
-    //adicionar um validador que preste atenção se o cpf é valido ou não, e se já existe uma conta com esse cpf
-
-    Console.WriteLine("Seja bem vindo !");
     
+    DentroDoBanco(conta);
+    LimparTela(5);
 
 }
 
+
+
+
+void DentroDoBanco(Conta conta)
+{
+    System.Console.WriteLine($"Olá {conta.exibirTitular}!");
+    System.Console.WriteLine("O que deseja fazer hoje: ");
+    System.Console.WriteLine("Ver Saldo");
+}
 
 Menu();

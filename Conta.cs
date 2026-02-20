@@ -79,6 +79,10 @@ namespace OUTBANK
             SaldoEmprestimo -= valor;
             AtualizarSaldoTotal();
         }
+        public void exibirTitular()
+        {
+            Console.WriteLine($"Titular: {Titular}");
+        }
 
         public virtual void exibirInformacoes()
         {

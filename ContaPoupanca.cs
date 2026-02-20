@@ -6,7 +6,7 @@ namespace OUTBANK
 {
     internal class ContaPoupanca : Conta
     {
-        public double TaxaRendimentoMes { get; private set; } = 0.05;
+        public double TaxaRendimentoMes { get;  } = 0.05;
         public ContaPoupanca(string titular) : base(titular) {}
 
         public void AnalisarRendimento(int meses)
@@ -26,7 +26,7 @@ namespace OUTBANK
         {
             base.exibirInformacoes();
        
-            Console.WriteLine($"Sua taxa de rendimento é de {TaxaRendimentoMes.100}");
+            Console.WriteLine($"Sua taxa de rendimento é de {TaxaRendimentoMes*100:F2}");
         }
 
     }

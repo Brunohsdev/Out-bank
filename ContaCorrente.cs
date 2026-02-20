@@ -27,7 +27,7 @@ namespace OUTBANK
         {
             base.exibirInformacoes();
             
-            Console.WriteLine($"Sua taxa por saque é de R${Taxa.100}");
+            Console.WriteLine($"Sua taxa por saque é de R${Taxa*100:F2}");
             
         }
     }
