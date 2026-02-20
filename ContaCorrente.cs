@@ -22,6 +22,14 @@ namespace OUTBANK
             SaldoConta = SaldoConta - (valor + valorTaxa);
 
         }
+
+        public override void exibirInformacoes()
+        {
+            base.exibirInformacoes();
+            
+            Console.WriteLine($"Sua taxa por saque é de R${Taxa.100}");
+            
+        }
     }
 }
 

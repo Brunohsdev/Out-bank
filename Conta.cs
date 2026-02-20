@@ -79,5 +79,15 @@ namespace OUTBANK
             SaldoEmprestimo -= valor;
             AtualizarSaldoTotal();
         }
+
+        public virtual void exibirInformacoes()
+        {
+            Console.WriteLine($"Titular: {Titular}");
+            Console.WriteLine($"Número da Conta: {NumeroConta}");
+            Console.WriteLine($"Saldo da Conta: R${SaldoConta}");
+            Console.WriteLine($"Saldo do Empréstimo: R${SaldoEmprestimo}");
+            Console.WriteLine($"Limite de Empréstimo: R${LimiteEmprestimo}");
+        }
     }
+
 }

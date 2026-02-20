@@ -22,6 +22,12 @@ namespace OUTBANK
 
             Console.WriteLine($"O valor do rendimento em {meses} é de R$ {valorAtual:F2}.");
         }
+        public virtual void exibirInformacoes()
+        {
+            base.exibirInformacoes();
+       
+            Console.WriteLine($"Sua taxa de rendimento é de {TaxaRendimentoMes.100}");
+        }
 
     }
 }
