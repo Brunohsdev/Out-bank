@@ -22,7 +22,7 @@ namespace OUTBANK
 
             Console.WriteLine($"O valor do rendimento em {meses} é de R$ {valorAtual:F2}.");
         }
-        public virtual void exibirInformacoes()
+        public override void exibirInformacoes()
         {
             base.exibirInformacoes();
        
