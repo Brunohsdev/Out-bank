@@ -1,225 +1,455 @@
-﻿using OUTBANK;
-Dictionary<string, Conta> contas = new Dictionary<string, Conta>();
+﻿using System;
+using System.Collections.Generic;
+using OUTBANK;
 
+// pega tudo do txt antes de começar 
+Dictionary<string, Conta> contas = BancoDados.CarregarContas();
+
+// utils
 
 void ExibirTituloDaOpcao(string titulo)
 {
-    int quantidadeDeLetras = titulo.Length;
-    string asteriscos = string.Empty.PadLeft(quantidadeDeLetras, '*');
-    Console.WriteLine(asteriscos);
-    Console.WriteLine(titulo);
-    Console.WriteLine(asteriscos + "\n");
+    string borda = new string('═', titulo.Length + 4);
+    Console.WriteLine($"\n  ╔{borda}╗");
+    Console.WriteLine($"  ║  {titulo}  ║");
+    Console.WriteLine($"  ╚{borda}╝\n");
 }
 
-void LimparTela(int segundos)
+void Pausar(int segundos = 2)
 {
-    Thread.Sleep(segundos * 1000); 
+    System.Threading.Thread.Sleep(segundos * 1000);
+}
+
+void LimparEContinuar(string mensagem = "")
+{
+    if (!string.IsNullOrEmpty(mensagem))
+        Console.WriteLine($"\n  {mensagem}");
+    Console.Write("\n  Pressione ENTER para continuar...");
+    Console.ReadLine();
     Console.Clear();
 }
 
+double LerDouble(string prompt)
+{
+    while (true)
+    {
+        Console.Write($"  {prompt}");
+        try
+        {
+            string entrada = Console.ReadLine()?.Replace(",", ".").Trim();
+            double valor = double.Parse(entrada, System.Globalization.CultureInfo.InvariantCulture);
+            return valor;
+        }
+        catch (FormatException)
+        {
+            Console.WriteLine("  Valor inválido! Digite um número (ex: 150.50).");
+        }
+    }
+}
+
+int LerInt(string prompt)
+{
+    while (true)
+    {
+        Console.Write($"  {prompt}");
+        try
+        {
+            return int.Parse(Console.ReadLine()?.Trim() ?? "0");
+        }
+        catch (FormatException)
+        {
+            Console.WriteLine("  Digite apenas números inteiros.");
+        }
+    }
+}
+
+string LerCPF()
+{
+    while (true)
+    {
+        Console.Write("  CPF (apenas números): ");
+        string cpf = Console.ReadLine()?.Trim() ?? "";
+        string apenasDigitos = System.Text.RegularExpressions.Regex.Replace(cpf, @"\D", "");
+
+        if (apenasDigitos.Length == 11)
+            return apenasDigitos;
+
+        Console.WriteLine("  CPF inválido. Informe exatamente 11 dígitos.");
+    }
+}
+
+DateTime LerData()
+{
+    while (true)
+    {
+        Console.Write("  Data de nascimento (dd/mm/aaaa): ");
+        string entrada = Console.ReadLine()?.Trim() ?? "";
+        if (DateTime.TryParseExact(entrada, "dd/MM/yyyy",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out DateTime data))
+        {
+            if (data > DateTime.Today)
+            {
+                Console.WriteLine("  Data de nascimento não pode ser no futuro.");
+                continue;
+            }
+            return data;
+        }
+        Console.WriteLine("  Data inválida. Use o formato dd/mm/aaaa.");
+    }
+}
+
+// menu principal
+
 void Menu()
 {
-    Console.WriteLine(@"  
-░█████╗░██╗░░░██╗████████╗  ██████╗░░█████╗░███╗░░██╗██╗░░██╗
-██╔══██╗██║░░░██║╚══██╔══╝  ██╔══██╗██╔══██╗████╗░██║██║░██╔╝
-██║░░██║██║░░░██║░░░██║░░░  ██████╦╝███████║██╔██╗██║█████═╝░
-██║░░██║██║░░░██║░░░██║░░░  ██╔══██╗██╔══██║██║╚████║██╔═██╗░
-╚█████╔╝╚██████╔╝░░░██║░░░  ██████╦╝██║░░██║██║░╚███║██║░╚██╗
-░╚════╝░░╚═════╝░░░░╚═╝░░░  ╚═════╝░╚═╝░░╚═╝╚═╝░░╚══╝╚═╝░░╚═╝");
-    Console.WriteLine("1. Acessar Conta");
-    Console.WriteLine("2. Criar Conta");
-    Console.WriteLine("3. Sair");
+    Console.Clear();
+    Console.WriteLine(@"
+  ░█████╗░██╗░░░██╗████████╗  ██████╗░░█████╗░███╗░░██╗██╗░░██╗
+  ██╔══██╗██║░░░██║╚══██╔══╝  ██╔══██╗██╔══██╗████╗░██║██║░██╔╝
+  ██║░░██║██║░░░██║░░░██║░░░  ██████╦╝███████║██╔██╗██║█████═╝░
+  ██║░░██║██║░░░██║░░░██║░░░  ██╔══██╗██╔══██║██║╚████║██╔═██╗░
+  ╚█████╔╝╚██████╔╝░░░██║░░░  ██████╦╝██║░░██║██║░╚███║██║░╚██╗
+  ░╚════╝░░╚═════╝░░░░╚═╝░░░  ╚═════╝░╚═╝░░╚═╝╚═╝░░╚══╝╚═╝░░╚═╝
+    ");
+    Console.WriteLine("  ─────────────────────────────────────────");
+    Console.WriteLine("  [1] Acessar Conta");
+    Console.WriteLine("  [2] Criar Conta");
+    Console.WriteLine("  [3] Listar Contas");
+    Console.WriteLine("  [4] Sair");
+    Console.WriteLine("  ─────────────────────────────────────────");
 
-    int opcao = int.Parse(Console.ReadLine());
+    int opcao = LerInt("Escolha uma opção: ");
 
-    switch(opcao)
+    switch (opcao)
     {
-        case 1:
-            AcessarConta();
-            break;
-        case 2:
-            CriarConta();
-            break;
+        case 1: AcessarConta(); break;
+        case 2: CriarConta(); break;
         case 3:
-            Console.WriteLine("Saindo...");
+            BancoDados.ListarContas();
+            LimparEContinuar();
+            Menu();
+            break;
+        case 4:
+            Console.WriteLine("\n  Obrigado por usar o OUT BANK. Até logo!");
             break;
         default:
-            Console.WriteLine("Opção inválida! Tente novamente.");
+            Console.WriteLine("  Opção inválida.");
+            Pausar(1);
             Menu();
             break;
     }
 }
 
+// acessar conta
 
 void AcessarConta()
 {
     ExibirTituloDaOpcao("Acessar Conta");
-    Console.WriteLine("Digite seu Nome:");
-    LimparTela(0);
-    string nome = Console.ReadLine();
 
-    if (contas.ContainsKey(nome))
+    Console.Write("  Nome do titular: ");
+    string nome = Console.ReadLine()?.Trim() ?? "";
+
+    if (!contas.ContainsKey(nome))
     {
-        var conta = contas[nome];
-        Console.WriteLine($"Seja bem-vindo de volta {conta.exibirTitular}");
-        DentroDoBanco(conta);
-    }
-    else
-    {
-        Console.Write("Nome do titular não encontrado! \n Deseja criar conta ? responda com s ou n ");
-        if(Console.ReadLine().ToLower() == "s")
-        {
+        Console.WriteLine($"\n  Titular '{nome}' não encontrado.");
+        Console.Write("  Deseja criar uma nova conta? (s/n): ");
+        string resp = Console.ReadLine()?.Trim().ToLower() ?? "n";
+
+        if (resp == "s")
             CriarConta();
-        }
         else
         {
-            Console.WriteLine("Voltando ao menu...");
+            LimparEContinuar("Voltando ao menu...");
             Menu();
         }
+        return;
     }
+
+    // Validação de senha
+    Conta conta = contas[nome];
+    int tentativas = 3;
+
+    while (tentativas > 0)
+    {
+        Console.Write("  Senha: ");
+        string senha = LerSenhaOculta();
+
+        if (conta.ValidarSenha(senha))
+        {
+            Console.Clear();
+            Console.WriteLine($"\n Bem-vindo de volta, {conta.Titular.Nome}!");
+            Pausar(1);
+            DentroDoBanco(conta);
+            return;
+        }
+
+        tentativas--;
+        Console.WriteLine($"  Senha incorreta. Tentativas restantes: {tentativas}");
+    }
+
+    LimparEContinuar("Acesso bloqueado. Muitas tentativas incorretas.\nSaia daqui");
+    Menu();
 }
 
+string LerSenhaOculta()
+{
+    string senha = "";
+    ConsoleKeyInfo tecla;
+    while (true)
+    {
+        tecla = Console.ReadKey(intercept: true);
+        if (tecla.Key == ConsoleKey.Enter) break;
+        if (tecla.Key == ConsoleKey.Backspace && senha.Length > 0)
+        {
+            senha = senha[..^1];
+            Console.Write("\b \b");
+        }
+        else if (tecla.Key != ConsoleKey.Backspace)
+        {
+            senha += tecla.KeyChar;
+            Console.Write("*");
+        }
+    }
+    Console.WriteLine();
+    return senha;
+}
+
+// criar conta
 
 void CriarConta()
 {
     ExibirTituloDaOpcao("Criar Conta");
-    Console.WriteLine("Digite seu Nome:");
-    string titular = Console.ReadLine();
-    LimparTela(0);
-    Console.WriteLine($"Seja bem-vindo {titular}");
-    LimparTela(2);
 
-    TipoDeConta();
+    Console.Write("  Nome completo: ");
+    string nome = Console.ReadLine()?.Trim() ?? "";
 
-    if (!int.TryParse(Console.ReadLine(), out int resposta))
+    if (string.IsNullOrWhiteSpace(nome))
     {
-        Console.WriteLine("Entrada inválida! Voltando ao menu...");
+        LimparEContinuar("Nome inválido. Operação cancelada.");
         Menu();
         return;
     }
 
-    Conta conta = null;
-
-    if (resposta < 1 || resposta > 3)
+    if (contas.ContainsKey(nome))
     {
-        Console.WriteLine("Opção inválida! Voltando ao menu...");
+        LimparEContinuar($"Já existe uma conta para '{nome}'. Use 'Acessar Conta'.");
         Menu();
         return;
     }
-    else if (resposta == 1)
+
+    string cpf = LerCPF();
+    DateTime dataNasc = LerData();
+
+    Console.Write("  Crie uma senha: ");
+    string senha = LerSenhaOculta();
+    Console.Write("  Confirme a senha: ");
+    string confirmacao = LerSenhaOculta();
+
+    if (senha != confirmacao)
     {
-        conta = new ContaCorrente(titular);
-    }
-    else if (resposta == 2)
-    {
-        conta = new ContaPoupanca(titular);
-    }
-    else // resposta == 3
-    {
-        conta = new ContaEmpresarial(titular);
+        LimparEContinuar("As senhas não coincidem. Operação cancelada.");
+        Menu();
+        return;
     }
 
-    if (conta != null)
-    {
-        conta.exibirInformacoes();
-        LimparTela(5);
+    ExibirTiposDeConta();
+    int resposta = LerInt("Escolha o tipo de conta: ");
 
-        if (!string.IsNullOrWhiteSpace(titular))
+    Conta conta;
+
+    try
+    {
+        conta = resposta switch
         {
-            contas.Add(titular, conta);
-            Console.WriteLine($"Bem-vindo ao OUT-BANK {titular}");
-            DentroDoBanco(conta);
-        }
-        else
-        {
-            Console.WriteLine("Titular inválido. Conta não foi adicionada ao sistema.");
-        }
+            1 => new ContaCorrente(nome, cpf, dataNasc, senha),
+            2 => new ContaPoupanca(nome, cpf, dataNasc, senha),
+            3 => new ContaEmpresarial(nome, cpf, dataNasc, senha),
+            _ => throw new ArgumentOutOfRangeException("Opção inválida.")
+        };
+    }
+    catch (ArgumentOutOfRangeException e)
+    {
+        LimparEContinuar($" {e.Message}");
+        Menu();
+        return;
     }
 
-    LimparTela(5);
+    conta.ExibirInformacoes();
+    contas[nome] = conta;
+    BancoDados.SalvarConta(conta);
 
+    Console.WriteLine($"\n Conta criada com sucesso! Bem-vindo ao OUT BANK, {nome}!");
+    Pausar(2);
+    DentroDoBanco(conta);
 }
 
-void TipoDeConta()
+void ExibirTiposDeConta()
 {
-    Console.WriteLine("Temos 3 opções de conta para a criação:");
-    LimparTela(2);
-    Console.WriteLine("1 - Conta Corrente: Ideal para movimentações frequentes. Possui uma pequena taxa a cada saque realizado.");
-    LimparTela(4);
-    Console.WriteLine("2 - Conta Poupança: Não possui taxa de saque e ainda pode gerar rendimento mensal sobre o saldo.");
-    LimparTela(4);
-    Console.WriteLine("3 - Conta Empresarial: Indicada para empresas. Oferece limite de empréstimo extra para auxiliar no fluxo de caixa.");
-    LimparTela(4);
-
-
-    Console.Write("Que tipo de conta você gostaria de criar no OUT BANK ? ");
-    
-
+    Console.WriteLine("\n  ╔══ TIPOS DE CONTA ══════════════════════════════════════════╗");
+    Console.WriteLine("  [1] Conta Corrente   — Taxa de 5% por saque. Limite R$ 400");
+    Console.WriteLine("  [2] Conta Poupança   — Sem taxa. Rendimento 0.5%/mês");
+    Console.WriteLine("  [3] Conta Empresarial — Sem taxa. Limite empréstimo R$ 10.000");
+    Console.WriteLine("  ╚════════════════════════════════════════════════════════════╝");
 }
 
+//dentro do banco 
 
 void DentroDoBanco(Conta conta)
 {
-    LimparTela(0);
-    if (conta == null)
-    {
-        System.Console.WriteLine("Conta inválida. Voltando ao menu...");
-        Menu();
-        return;
-    }
-
-    // Exibe saudação e o titular usando o método existente na classe Conta
-    
-    System.Console.WriteLine($"O que deseja fazer hoje {conta} ? ");
-    MenuPrincipalDentroDaConta(conta);
-
+    Console.Clear();
+    Console.WriteLine($"  Olá, {conta.Titular.Nome}! O que deseja fazer hoje?");
+    MenuPrincipal(conta);
 }
 
-void MenuPrincipalDentroDaConta(Conta conta)
+void MenuPrincipal(Conta conta)
 {
-    ExibirTituloDaOpcao("Menu Principal");
-    System.Console.WriteLine("1 - Ver Saldo");
-    System.Console.WriteLine("2 - Depositar");
-    System.Console.WriteLine("3 - Sacar");
-    System.Console.WriteLine("4 - Pegar empréstimo");
-    System.Console.WriteLine("4 - Pagar empréstimo");
-    System.Console.WriteLine("5 - Investir");
+    ExibirTituloDaOpcao("Menu da Conta");
+    Console.WriteLine("  [1] Ver Saldo");
+    Console.WriteLine("  [2] Depositar");
+    Console.WriteLine("  [3] Sacar");
+    Console.WriteLine("  [4] Pegar Empréstimo");
+    Console.WriteLine("  [5] Pagar Empréstimo");
+    Console.WriteLine("  [6] Simular Rendimento (Poupança)");
+    Console.WriteLine("  [7] Informações da Conta");
+    Console.WriteLine("  [8] Sair da Conta");
+    Console.WriteLine("  ─────────────────────────────────────");
 
-    int opcao = int.Parse(Console.ReadLine());
+    int opcao = LerInt("Escolha uma opção: ");
+    Console.WriteLine();
+
     switch (opcao)
     {
         case 1:
-            //Console.WriteLine($"Saldo: R$ {conta.ExibirSaldoTotal()}");
-            Console.WriteLine("só de teste");
+            ExibirTituloDaOpcao("Saldo");
+            conta.ExibirSaldoTotal();
+            LimparEContinuar();
             DentroDoBanco(conta);
             break;
-        case 2:
-            Console.Write("Quanto você deseja depositar? ");
-            double valorDepositar = double.Parse(Console.ReadLine());
-            conta.Depositar(valorDepositar);
 
+        case 2:
+            ExibirTituloDaOpcao("Depositar");
+            try
+            {
+                double valor = LerDouble("Valor a depositar: R$ ");
+                conta.Depositar(valor);
+                BancoDados.SalvarConta(conta);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine($"  {e.Message}");
+            }
+            LimparEContinuar();
             DentroDoBanco(conta);
             break;
+
         case 3:
-            Console.WriteLine("Quanto você deseja sacar ?");
-                double valorSacar = double.Parse(Console.ReadLine());
-                conta.Sacar(valorSacar);
-                DentroDoBanco(conta);
-            break;
-        case 4:
-            Console.WriteLine("Quanto você deseja pegar de empréstimo ?");
-                double valorEmprestimo = double.Parse(Console.ReadLine());
-                conta.PegarEmprestimo(valorEmprestimo);
-                DentroDoBanco(conta);
-            break;
-        case 5:
-            Console.WriteLine("Investir");
+            ExibirTituloDaOpcao("Sacar");
+            try
+            {
+                double valor = LerDouble("Valor a sacar: R$ ");
+                conta.Sacar(valor);
+                BancoDados.SalvarConta(conta);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine($"  {e.Message}");
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine($"  {e.Message}");
+            }
+            LimparEContinuar();
             DentroDoBanco(conta);
             break;
+
+        case 4:
+            ExibirTituloDaOpcao("Pegar Empréstimo");
+            Console.WriteLine($"Limite disponível: R$ {(conta.LimiteEmprestimo - conta.SaldoEmprestimo):F2}");
+            try
+            {
+                double valor = LerDouble("Valor do empréstimo: R$ ");
+                conta.PegarEmprestimo(valor);
+                BancoDados.SalvarConta(conta);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine($"  {e.Message}");
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine($"  {e.Message}");
+            }
+            LimparEContinuar();
+            DentroDoBanco(conta);
+            break;
+
+        case 5:
+            ExibirTituloDaOpcao("Pagar Empréstimo");
+            Console.WriteLine($"Dívida atual: R$ {conta.SaldoEmprestimo:F2}");
+            try
+            {
+                double valor = LerDouble("Valor a pagar: R$ ");
+                conta.PagarEmprestimo(valor);
+                BancoDados.SalvarConta(conta);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine($"  {e.Message}");
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine($"  {e.Message}");
+            }
+            LimparEContinuar();
+            DentroDoBanco(conta);
+            break;
+
+        case 6:
+            ExibirTituloDaOpcao("Simular Rendimento");
+            if (conta is ContaPoupanca poupanca)
+            {
+                try
+                {
+                    int meses = LerInt("Quantos meses deseja simular? ");
+                    poupanca.SimularRendimento(meses);
+                }
+                catch (ArgumentException e)
+                {
+                    Console.WriteLine($" {e.Message}");
+                }
+                catch (InvalidOperationException e)
+                {
+                    Console.WriteLine($" {e.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine(" Esta funcionalidade é exclusiva da Conta Poupança.");
+            }
+            LimparEContinuar();
+            DentroDoBanco(conta);
+            break;
+
+        case 7:
+            conta.ExibirInformacoes();
+            LimparEContinuar();
+            DentroDoBanco(conta);
+            break;
+
+        case 8:
+            BancoDados.SalvarConta(conta); 
+            LimparEContinuar("Saindo da conta... Até logo!");
+            Menu();
+            break;
+
         default:
-            Console.WriteLine("Opção inválida! Tente novamente.");
-            MenuPrincipalDentroDaConta(conta);
+            Console.WriteLine(" Opção inválida!");
+            Pausar(1);
+            DentroDoBanco(conta);
             break;
     }
 }
+
+//começando o menu
 Menu();
